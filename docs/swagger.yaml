@@ -1,0 +1,20 @@
+basePath: /
+host: localhost:8097
+info:
+  contact:
+    email: support@foxyexam.com
+    name: API Support
+  description: This is an internal evidence processing microservice for Foxy Exam.
+  license:
+    name: Unlicense
+    url: http://unlicense.org
+  termsOfService: http://swagger.io/terms/
+  title: Media Encoder Service API
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

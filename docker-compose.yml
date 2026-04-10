@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  media-encoder:
+    build: .
+    container_name: foxy-media-encoder
+    ports:
+      - "8097:8097"
+    environment:
+      - API_KEY=${MEDIA_ENCODER_SERVICE_API_KEY:-KLTN-hehehehe}
+      - PORT=8097
+      # auto = probe NVENC/QSV then CPU (veryfast). Plain Alpine image has no GPU → usually CPU.
+      # NVIDIA: use NVIDIA Container Toolkit + image with nvenc, then MEDIA_ENCODER_VIDEO=nvenc
+      - MEDIA_ENCODER_VIDEO=${MEDIA_ENCODER_VIDEO:-auto}
+      - MEDIA_ENCODER_CPU_PRESET=${MEDIA_ENCODER_CPU_PRESET:-veryfast}
+    volumes:
+      # Same path as Laravel’s storage/app/private inside the app container (WORKDIR /var/www/html).
+      # Then queue:work in Docker resolves paths like /var/www/html/storage/app/private/... and FFmpeg can open them.
+      - ../exam-sys/storage/app/private:/var/www/html/storage/app/private:rw
+      #
+      # If Laravel + queue run on the HOST (not in Docker), bind the same host folder to the path above and set in exam-sys .env:
+      #   MEDIA_ENCODER_URL=http://127.0.0.1:8097
+      #   MEDIA_ENCODER_PATH_MAP_FROM=/absolute/path/to/exam-sys/storage/app/private
+      #   MEDIA_ENCODER_PATH_MAP_TO=/var/www/html/storage/app/private
+    mem_limit: 2g
+    memswap_limit: 2g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8097/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
