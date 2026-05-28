@@ -25,6 +25,13 @@ services:
     mem_limit: 2g
     memswap_limit: 2g
     restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, video]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8097/health"]
       interval: 30s
